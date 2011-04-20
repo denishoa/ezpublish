@@ -61,9 +61,13 @@ class eZSearchEngine implements ezpSearchEngine
         return true;
     }
 
-    /*!
-     Adds an object to the search database.
-    */
+    /**
+     * Adds object $contentObject to the search database.
+     *
+     * @param eZContentObject $contentObject Object to add to search engine
+     * @param bool $commit Whether to commit after adding the object
+     * @return bool True if the operation succeed.
+     */
     public function addObject( $contentObject, $commit )
     {
         $contentObjectID = $contentObject->attribute( 'id' );
@@ -74,7 +78,7 @@ class eZSearchEngine implements ezpSearchEngine
             $errCurrentVersion = $contentObject->attribute( 'current_version');
             eZDebug::writeError( "Failed to fetch \"current version\" ({$errCurrentVersion})" .
                                  " of content object (ID: {$contentObjectID})", 'eZSearchEngine' );
-            return;
+            return false;
         }
 
         $indexArray = array();
@@ -163,6 +167,8 @@ class eZSearchEngine implements ezpSearchEngine
             $placement = $this->indexWords( $contentObject, array_slice( $indexArray, $arrayCount, 1000 ), $wordIDArray, $placement );
         }
         $db->commit();
+
+        return true;
     }
 
     /*!
@@ -383,9 +389,13 @@ class eZSearchEngine implements ezpSearchEngine
         return $placement;
     }
 
-    /*!
-     \static
-    */
+    /**
+     * Removes object $contentObject from the search database.
+     *
+     * @param eZContentObject $contentObject the content object to remove
+     * @param bool $commit Whether to commit after removing the object
+     * @return bool True if the operation succeed.
+     */
     public function removeObject( $contentObject, $commit )
     {
         $db = eZDB::instance();

@@ -52,7 +52,7 @@ $needRemoveWithUpdate = $searchEngine->needRemoveWithUpdate();
 
 while( true )
 {
-    $entries = $db->arrayQuery( "SELECT DISTINCT param FROM ezpending_actions WHERE action = 'index_object'",
+    $entries = $db->arrayQuery( "SELECT DISTINCT param FROM ezpending_actions WHERE action = 'index_object' ORDER BY param",
                                 array( 'limit' => $limit,
                                        'offset' => $offset ) );
 
@@ -65,15 +65,27 @@ while( true )
             $cli->output( "\tIndexing object ID #$objectID" );
             $db->begin();
             $object = eZContentObject::fetch( $objectID );
+            $removeFromPendingActions = true;
             if ( $object )
             {
                 if ( $needRemoveWithUpdate )
                 {
                     $searchEngine->removeObject( $object, false );
                 }
-                $searchEngine->addObject( $object, false );
+                $removeFromPendingActions = $searchEngine->addObject( $object, false );
             }
-            $db->query( "DELETE FROM ezpending_actions WHERE action = 'index_object' AND param = '$objectID'" );
+
+            if ( $removeFromPendingActions )
+            {
+                $db->query( "DELETE FROM ezpending_actions WHERE action = 'index_object' AND param = '$objectID'" );
+            }
+            else
+            {
+                $cli->warning( "\tFailed indexing object ID #$objectID, keeping it in the queue." );
+                // Increase the offset to skip failing objects
+                ++$offset;
+            }
+
             $db->commit();
         }
 

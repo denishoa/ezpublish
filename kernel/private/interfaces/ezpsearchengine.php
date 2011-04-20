@@ -37,6 +37,7 @@ interface ezpSearchEngine
      *
      * @param eZContentObject $contentObject Object to add to search engine
      * @param bool $commit Whether to commit after adding the object
+     * @return bool True if the operation succeed.
      */
     public function addObject( $contentObject, $commit );
 
@@ -45,6 +46,7 @@ interface ezpSearchEngine
      *
      * @param eZContentObject $contentObject the content object to remove
      * @param bool $commit Whether to commit after removing the object
+     * @return bool True if the operation succeed.
      */
     public function removeObject( $contentObject, $commit );
 
