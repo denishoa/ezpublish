@@ -40,6 +40,16 @@ $db = eZDB::instance();
 $offset = 0;
 $limit = 50;
 
+$searchEngine = eZSearch::getEngine();
+
+if ( !$searchEngine instanceof ezpSearchEngine )
+{
+    $cli->error( "The configured search engine does not implement the ezpSearchEngine interface or can't be found." );
+    $script->shutdown( 1 );
+}
+
+$needRemoveWithUpdate = $searchEngine->needRemoveWithUpdate();
+
 while( true )
 {
     $entries = $db->arrayQuery( "SELECT DISTINCT param FROM ezpending_actions WHERE action = 'index_object'",
@@ -57,12 +67,19 @@ while( true )
             $object = eZContentObject::fetch( $objectID );
             if ( $object )
             {
-                eZSearch::removeObject( $object );
-                eZSearch::addObject( $object );
+                if ( $needRemoveWithUpdate )
+                {
+                    $searchEngine->removeObject( $object, false );
+                }
+                $searchEngine->addObject( $object, false );
             }
             $db->query( "DELETE FROM ezpending_actions WHERE action = 'index_object' AND param = '$objectID'" );
             $db->commit();
         }
+
+        $searchEngine->commit();
+        // clear object cache to conserve memory
+        eZContentObject::clearCache();
     }
     else
     {

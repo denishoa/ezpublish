@@ -33,7 +33,7 @@
 
 */
 
-class eZSearchEngine
+class eZSearchEngine implements ezpSearchEngine
 {
     function eZSearchEngine()
     {
@@ -50,13 +50,13 @@ class eZSearchEngine
     }
 
 
-    static function needCommit()
+    public function needCommit()
     {
         //commits are NA
         return false;
     }
 
-    static function needRemoveWithUpdate()
+    public function needRemoveWithUpdate()
     {
         return true;
     }
@@ -64,7 +64,7 @@ class eZSearchEngine
     /*!
      Adds an object to the search database.
     */
-    function addObject( $contentObject, $commit )
+    public function addObject( $contentObject, $commit )
     {
         $contentObjectID = $contentObject->attribute( 'id' );
         $currentVersion = $contentObject->currentVersion();
@@ -386,7 +386,7 @@ class eZSearchEngine
     /*!
      \static
     */
-    function removeObject( $contentObject, $commit )
+    public function removeObject( $contentObject, $commit )
     {
         $db = eZDB::instance();
         $objectID = $contentObject->attribute( "id" );
@@ -460,7 +460,7 @@ class eZSearchEngine
     /*!
      Runs a query to the search engine.
     */
-    function search( $searchText, $params = array(), $searchTypes = array() )
+    public function search( $searchText, $params = array(), $searchTypes = array() )
     {
         if ( count( $searchTypes ) == 0 )
         {
@@ -1368,7 +1368,7 @@ class eZSearchEngine
      \return Returns an array describing the supported search types in thie search engine.
      \note It has been renamed. In eZ Publish 3.4 and older it was (wrongly) named suportedSearchTypes().
     */
-    function supportedSearchTypes()
+    public function supportedSearchTypes()
     {
         $searchTypes = array( array( 'type' => 'attribute',
                                      'subtype' => 'fulltext',
@@ -2300,6 +2300,13 @@ class eZSearchEngine
             }
         }
         return false;
+    }
+
+    /**
+     * Commit the changes to the search engine
+     */
+    public function commit()
+    {
     }
 
 
